@@ -35,6 +35,12 @@ public class Porgram {
 		Seller newSeller = new Seller(null, "Greg", "greg@gmail.com", new Date(), 4000.0, department);
 		sellerDao.insert(newSeller);
 		System.out.println("Inserted! New id = " + newSeller.getId()); //para verificar se trouxe o Id criado de volta
+		
+		System.out.println("=== TESTE 5: seller Update ===");
+		seller = sellerDao.findById(1);
+		seller.setName("Martha Waine");
+		sellerDao.update(seller);
+		System.out.println("Update completed");
 
 	}
 
