@@ -54,20 +54,12 @@ public class SellerDaoJDBC implements SellerDao{ //implementa a interface Seller
 			//após executar a query, o resultSet está apontando para a posição 0 (que não possui dados)
 			if(rs.next()) { //testar se veio algum resultado, se a consulta não teve nenhum registro de retorno, passa direto por essa condição
 				//é necessário navegar entre os registros retornados para instanciar os objetos (Vendedor com o Departamento pendurado nele)
-				Department dep = new Department();
-				dep.setId(rs.getInt("DepartmentId"));//para buscar o ID do departmento 
-				dep.setName(rs.getString("DepName"));//para buscar o nome do departamento
-				//após os comandos acima, foi instanciado um Departamento e setamos seus valores
+				//instanciar um Departamento e setamos seus valores, a partir da criação do método instantiateDepartment
+				Department dep = instantiateDepartment(rs); 
 				
-				//agora é necessário instanciar um vendedor
-				Seller obj = new Seller();
-				obj.setId(rs.getInt("Id"));
-				obj.setName(rs.getString("Name"));
-				obj.setEmail(rs.getString("Email"));
-				obj.setBaseSalary(rs.getDouble("BaseSalary"));
-				obj.setBirthDate(rs.getDate("BirthDate"));
-				//agora preciso verificar quem será o Departamento associado com o Seller, será associado o objeto Departamento criado dep
-				obj.setDepartment(dep);
+				
+				//agora é necessário instanciar um vendedor, através do método instantiateSeller()
+				Seller obj = instantiateSeller(rs, dep);
 				return obj;//retornar o objeto Seller (pois na declaração do método diz que retorna um Seller
 				
 			}
@@ -83,6 +75,26 @@ public class SellerDaoJDBC implements SellerDao{ //implementa a interface Seller
 		}
 		
 		
+	}
+
+	private Seller instantiateSeller(ResultSet rs, Department dep) throws SQLException {
+		Seller obj = new Seller();
+		obj.setId(rs.getInt("Id"));
+		obj.setName(rs.getString("Name"));
+		obj.setEmail(rs.getString("Email"));
+		obj.setBaseSalary(rs.getDouble("BaseSalary"));
+		obj.setBirthDate(rs.getDate("BirthDate"));
+		//agora preciso verificar quem será o Departamento associado com o Seller, será associado o objeto Departamento criado dep
+		obj.setDepartment(dep);
+		return obj;
+	}
+
+	private Department instantiateDepartment(ResultSet rs) throws SQLException {
+		Department dep = new Department();
+		//não vai ter tratamento, pois está sendo tratada já na operação findById, logo só adidicionar add throws declaration		
+		dep.setId(rs.getInt("DepartmentId"));//para buscar o ID do departmento 
+		dep.setName(rs.getString("DepName"));//para buscar o nome do departamento
+		return dep;
 	}
 
 	@Override
