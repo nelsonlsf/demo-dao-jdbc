@@ -4,7 +4,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import db.DB;
 import db.DbException;
@@ -76,6 +79,50 @@ public class SellerDaoJDBC implements SellerDao{ //implementa a interface Seller
 		
 		
 	}
+	
+	@Override
+	public List<Seller> findByDepartment(Department department) {
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		try {
+			st = conn.prepareStatement(
+					"SELECT seller.*, department.Name as DepName "
+					+ "FROM seller INNER JOIN department "
+					+ "ON seller.DepartmentId = department.Id "
+					+ "WHERE DepartmentId = ? "
+					+ "ORDER by Name"); //criando o SELECT
+			st.setInt(1, department.getId());//substituindo o ? pelo ID do departamento passado por argumento
+			rs = st.executeQuery();
+			List<Seller> list = new ArrayList<>();
+			Map<Integer, Department> map = new HashMap<>();//Map para fazer o controle de departamento
+			
+			while(rs.next()) { //while porque pode ter mais de 1 resultado, para percorrer o ResultSet enquanto tiver um próximo
+				//controle para não repetir a instanciação do mesmo departamento
+				//verificar se o departamento já existe
+				Department dep = map.get(rs.getInt("DepartmentId"));
+				
+				if(dep == null) { //significa que não existe, então tenho que instanciar
+					dep = instantiateDepartment(rs);
+					map.put(rs.getInt("DepartmentId"), dep); //inserir no map o departamento, dessa forma, se na próxima vez o resultado for o mesmo departamento, não instancia mais o departamento
+				}
+				//agora é necessário instanciar um vendedor, através do método instantiateSeller()
+				Seller obj = instantiateSeller(rs, dep);
+				list.add(obj);//adicionar o obje à lista
+								
+			}
+			return list;
+			
+		}catch(SQLException e) {
+			throw new DbException(e.getMessage());
+			
+		}
+		finally {
+			DB.closeStatement(st);
+			DB.closeResultSet(rs);
+		}
+		
+		
+	}
 
 	private Seller instantiateSeller(ResultSet rs, Department dep) throws SQLException {
 		Seller obj = new Seller();
@@ -102,6 +149,8 @@ public class SellerDaoJDBC implements SellerDao{ //implementa a interface Seller
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	
 	
 	
 
